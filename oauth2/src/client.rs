@@ -173,7 +173,7 @@ impl Client {
     }
 
     /// Create a refresh token exchange request given the user's refresh token
-    /// 
+    ///
     /// See [Discord's documentation] for more information
     ///
     /// [Discord's documentation]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
