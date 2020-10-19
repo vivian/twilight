@@ -1,3 +1,6 @@
+//! Structures and tools used for handling an oauth client and creating requests
+//! to act on its behalf
+
 use super::{
     authorization_url::{AuthorizationUrlBuilder, BotAuthorizationUrlBuilder},
     request::{
@@ -48,6 +51,9 @@ impl Error for CreateClientError<'_> {
     }
 }
 
+/// Creating an authorization url failed due to an issue with the redirect uri
+///
+/// This is returned from any function that takes in a redirect uri
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum RedirectUriInvalidError<'a> {
@@ -66,6 +72,7 @@ pub enum RedirectUriInvalidError<'a> {
     },
 }
 
+/// An oauth client
 #[derive(Clone, Debug)]
 pub struct Client {
     client_id: ApplicationId,
@@ -156,10 +163,20 @@ impl Client {
         AuthorizationUrlBuilder::new(self, redirect_uri)
     }
 
+    /// Create an access token exchange request given a code from the initial oauth response
+    ///
+    /// See [Discord's example] for more information
+    ///
+    /// [Discord's example]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-redirect-url-example
     pub fn access_token_exchange<'a>(&'a self, code: &'a str) -> AccessTokenExchangeBuilder<'a> {
         AccessTokenExchangeBuilder::new(self, code)
     }
 
+    /// Create a refresh token exchange request given the user's refresh token
+    /// 
+    /// See [Discord's documentation] for more information
+    ///
+    /// [Discord's documentation]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
     pub fn refresh_token_exchange<'a>(
         &'a self,
         refresh_token: &'a str,

@@ -23,7 +23,11 @@
     nonstandard_style,
     rust_2018_idioms,
     unused,
-    warnings
+    // warnings
+)]
+#![warn( // FIXME: PROMOTE TO DENY
+    missing_docs,
+    missing_doc_code_examples,
 )]
 #![allow(
     clippy::doc_markdown,

@@ -1,3 +1,5 @@
+//! The request and metadata that are used in the access token exchange
+
 use super::super::{
     scope::{self, Scope},
     Client, GrantType, TokenType,
@@ -6,6 +8,11 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Write;
 use twilight_model::{channel::Webhook, id::ApplicationId};
 
+/// The body to the access token exchange request.
+///
+/// This body is used in the [`AccessTokenExchangeRequest`]
+///
+/// [`AccessTokenExchangeRequest`]: struct.AccessTokenExchangeRequest.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct AccessTokenExchangeRequestBody<'a> {
@@ -25,6 +32,13 @@ pub struct AccessTokenExchangeRequestBody<'a> {
     pub scope: String,
 }
 
+/// The request for the access token exchange flow.
+///
+/// You can construct this request from a client using the [`Client::access_token_exchange`] method
+/// which will return a [`AccessTokenExchangeBuilder`]
+///
+/// [`Client::access_token_exchange`]: ../../client/struct.Client.html#method.access_token_exchange
+/// [`AccessTokenExchangeBuilder`]: struct.AccessTokenExchangeBuilder.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct AccessTokenExchangeRequest<'a> {
@@ -60,6 +74,9 @@ impl AccessTokenExchangeRequest<'_> {
     }
 }
 
+/// The response body from an [`AccessTokenExchangeRequest`]
+///
+/// [`AccessTokenExchangeRequest`]: struct.AccessTokenExchangeRequest.html
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct AccessTokenExchangeResponse {
@@ -91,6 +108,13 @@ pub struct AccessTokenExchangeResponse {
     pub webhook: Option<Webhook>,
 }
 
+/// A builder to construct an [`AccessTokenExchangeRequest`]
+///
+/// This builder is created from the client using the [`Client::access_token_exchange`]
+/// method.
+///
+/// [`Client::access_token_exchange`]: ../../client/struct.Client.html#method.access_token_exchange
+/// [`AccessTokenExchangeRequest`]: struct.AccessTokenExchangeRequest.html
 pub struct AccessTokenExchangeBuilder<'a> {
     client: &'a Client,
     code: &'a str,
@@ -108,6 +132,9 @@ impl<'a> AccessTokenExchangeBuilder<'a> {
         }
     }
 
+    /// Create an [`AccessTokenExchangeRequest`] configured from this builder
+    ///
+    /// [`AccessTokenExchangeRequest`]: struct.AccessTokenExchangeRequest.html
     pub fn build(&'a self) -> AccessTokenExchangeRequest<'a> {
         let scope = self.scopes.map(scope::join).unwrap_or_default();
 

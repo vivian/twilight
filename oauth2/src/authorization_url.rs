@@ -1,3 +1,5 @@
+//! The structures and tools needed to construct and deal with authorization urls
+
 use super::{
     client::{Client, RedirectUriInvalidError},
     Prompt, Scope,
@@ -32,8 +34,8 @@ impl ResponseType {
     /// ```
     /// use twilight_oauth2::authorization_url::ResponseType;
     ///
-    /// assert_eq!("code", ResponseType::Code);
-    /// assert_eq!("token", ResponseType::Token);
+    /// assert_eq!("code", ResponseType::Code.name());
+    /// assert_eq!("token", ResponseType::Token.name());
     /// ```
     pub fn name(self) -> &'static str {
         match self {
@@ -43,6 +45,7 @@ impl ResponseType {
     }
 }
 
+/// A builder to construct an authorization url
 pub struct AuthorizationUrlBuilder<'a> {
     client: &'a Client,
     prompt: Option<Prompt>,
@@ -67,6 +70,16 @@ impl<'a> AuthorizationUrlBuilder<'a> {
         })
     }
 
+    /// Build the authorization URL into a code grant URL
+    ///
+    /// This is the standard oauth method requiring a handshake between the
+    /// server and client after the code had been granted. Please refer to the
+    /// [Discord documentation] for more information.
+    ///
+    /// For implicit grant, see [`implicit_grant`]
+    ///
+    /// [`implicit_grant`]: #method.implicit_grant
+    /// [Discord documentation]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant
     pub fn build(&self) -> String {
         self.build_with_response_type(ResponseType::Code)
     }
@@ -187,6 +200,11 @@ impl<'a> AuthorizationUrlBuilder<'a> {
     }
 }
 
+/// A builder to construct a bot authorization url.
+///
+/// See [Discord's Bot Authorization Flow] for more info
+///
+/// [Discord's Bot Authorization Flow]: https://discord.com/developers/docs/topics/oauth2#bot-authorization-flow
 pub struct BotAuthorizationUrlBuilder<'a> {
     client: &'a Client,
     disable_guild_select: Option<bool>,
