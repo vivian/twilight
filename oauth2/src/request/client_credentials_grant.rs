@@ -1,3 +1,9 @@
+//! Create requests and parse responses when granting client credentials.
+//!
+//! Refer to [Discord's documentation] for additional information.
+//!
+//! [Discord's documentation]: https://discord.com/developers/docs/topics/oauth2#client-credentials-grant
+
 use super::super::{
     scope::{self, Scope},
     Client, GrantType, TokenType,
@@ -5,6 +11,11 @@ use super::super::{
 use serde::Serialize;
 use twilight_model::id::ApplicationId;
 
+/// The body for the client credentials grant request.
+///
+/// This body is used in the [`ClientCredentialsGrantRequest`]
+///
+/// [`ClientCredentialsGrantRequest`]: struct.ClientCredentialsGrantRequest.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct ClientCredentialsGrantRequestBody<'a> {
@@ -20,6 +31,13 @@ pub struct ClientCredentialsGrantRequestBody<'a> {
     pub scope: String,
 }
 
+/// The request for the client credentials grant flow.
+///
+/// You can construct this request from a client using the [`Client::client_credentials_grant`] method
+/// which will return a [`ClientCredentialsGrantBuilder`]
+///
+/// [`Client::client_credentials_grant`]: ../../client/struct.Client.html#method.client_credentials_grant
+/// [`ClientCredentialsGrantBuilder`]: struct.ClientCredentialsGrantBuilder.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct ClientCredentialsGrantRequest<'a> {
@@ -56,6 +74,9 @@ impl ClientCredentialsGrantRequest<'_> {
     }
 }
 
+/// The response body from a [`ClientCredentialsGrantRequest`]
+///
+/// [`ClientCredentialsGrantRequest`]: struct.ClientCredentialsGrantRequest.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct ClientCredentialsGrantResponse {

@@ -1,3 +1,9 @@
+//! Create requests and parse responses when exchanging refreshing a token.
+//!
+//! Refer to [Discord's documentation] for additional information.
+//!
+//! [Discord's documentation]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
+
 use super::super::{
     scope::{self, Scope},
     Client, GrantType, TokenType,
@@ -6,6 +12,11 @@ use serde::Serialize;
 use std::fmt::Write;
 use twilight_model::id::ApplicationId;
 
+/// The body for the refresh token exchange request.
+///
+/// This body is used in the [`RefreshTokenExchangeRequest`]
+///
+/// [`RefreshTokenExchangeRequest`]: struct.RefreshTokenExchangeRequest.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct RefreshTokenExchangeRequestBody<'a> {
@@ -25,6 +36,13 @@ pub struct RefreshTokenExchangeRequestBody<'a> {
     pub scope: String,
 }
 
+/// The request for the refresh token exchange.
+///
+/// You can construct this request from a client using the [`Client::refresh_token_exchange`] method
+/// which will return a [`RefreshTokenExchangeResponse`]
+///
+/// [`Client::refresh_token_exchange`]: ../../client/struct.Client.html#method.refresh_token_exchange
+/// [`RefreshTokenExchangeResponse`]: struct.RefreshTokenExchangeResponse.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct RefreshTokenExchangeRequest<'a> {
@@ -64,6 +82,9 @@ impl RefreshTokenExchangeRequest<'_> {
     }
 }
 
+/// The response body from a [`RefreshTokenExchangeRequest`]
+///
+/// [`RefreshTokenExchangeRequest`]: struct.RefreshTokenExchangeRequest.html
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct RefreshTokenExchangeResponse {
@@ -88,6 +109,13 @@ pub struct RefreshTokenExchangeResponse {
     pub token_type: TokenType,
 }
 
+/// A builder to construct an [`RefreshTokenExchangeRequest`]
+///
+/// This builder is created from the client using the [`Client::refresh_token_exchange`]
+/// method.
+///
+/// [`Client::refresh_token_exchange`]: ../../client/struct.Client.html#method.refresh_token_exchange
+/// [`RefreshTokenExchangeRequest`]: struct.RefreshTokenExchangeRequest.html
 pub struct RefreshTokenExchangeBuilder<'a> {
     client: &'a Client,
     refresh_token: &'a str,
@@ -105,6 +133,9 @@ impl<'a> RefreshTokenExchangeBuilder<'a> {
         }
     }
 
+    /// Create an [`RefreshTokenExchangeRequest`] configured from this builder
+    ///
+    /// [`RefreshTokenExchangeRequest`]: struct.RefreshTokenExchangeRequest.html
     pub fn build(&'a self) -> RefreshTokenExchangeRequest<'a> {
         RefreshTokenExchangeRequest {
             body: RefreshTokenExchangeRequestBody {
@@ -125,6 +156,16 @@ impl<'a> RefreshTokenExchangeBuilder<'a> {
         }
     }
 
+    /// Set the scopes for the client credentials grant request.
+    ///
+    /// By default no scopes are selected
+    ///
+    /// Read about Discord's [scope documentation].
+    ///
+    /// [RFC 6749 § 3.3] on access token scopes.
+    ///
+    /// [RFC 6749 § 3.3]: https://tools.ietf.org/html/rfc6749#section-3.3
+    /// [scope documentation]: https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes
     pub fn scopes(&mut self, scopes: &'a [Scope]) -> &mut Self {
         self.scopes.replace(scopes);
 

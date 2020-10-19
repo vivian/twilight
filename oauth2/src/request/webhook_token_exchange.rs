@@ -1,4 +1,4 @@
-//! Create requests and parse responses when exchanging an authorization code.
+//! Create requests and parse responses when exchanging a webhook token.
 //!
 //! This requires that the authorization scope was set to [`WebhookIncoming`].
 //! Refer to [Discord's documentation] for additional information.
@@ -10,6 +10,11 @@ use super::{super::TokenType, access_token_exchange::AccessTokenExchangeRequest}
 use serde::{Deserialize, Serialize};
 use twilight_model::channel::Webhook;
 
+/// The request for the webhook token exchange.
+///
+/// This is the same as the [`AccessTokenExchangeRequest`]
+///
+/// [`AccessTokenExchangeRequest`]: ../access_token_exchange/struct.AccessTokenExchangeRequest.html
 pub type WebhookTokenExchangeRequest<'a> = AccessTokenExchangeRequest<'a>;
 
 /// Response from exchange an authorization code when the [`WebhookIncoming`]

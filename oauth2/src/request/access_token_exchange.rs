@@ -1,4 +1,8 @@
-//! The request and metadata that are used in the access token exchange
+//! Create requests and parse responses when exchaging an access token.
+//!
+//! Refer to [Discord's documentation] for additional information.
+//!
+//! [Discord's documentation]: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant
 
 use super::super::{
     scope::{self, Scope},
@@ -8,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Write;
 use twilight_model::{channel::Webhook, id::ApplicationId};
 
-/// The body to the access token exchange request.
+/// The body for the access token exchange request.
 ///
 /// This body is used in the [`AccessTokenExchangeRequest`]
 ///
