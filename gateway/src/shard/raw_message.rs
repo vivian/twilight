@@ -24,20 +24,20 @@ pub struct CloseFrame<'a> {
     pub reason: Cow<'a, str>,
 }
 
-/// Construct a close frame from a code and a reason why.
-///
-/// # Examples
-///
-/// ```
-/// use twilight_gateway::shard::raw_message::CloseFrame;
-///
-/// let frame = CloseFrame::from((1000, "reason here"));
-///
-/// assert_eq!(1000, frame.code);
-/// assert_eq!("reason here", frame.reason);
-/// ```
-impl<'a, T: Into<Cow<'a, str>>> From<(u16, T)> for CloseFrame<'a> {
-    fn from((code, reason): (u16, T)) -> Self {
+impl<'a> CloseFrame<'a> {
+    /// Construct a close frame from a code and a reason why.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use twilight_gateway::shard::raw_message::CloseFrame;
+    ///
+    /// let frame = CloseFrame::new(1000, "reason here");
+    ///
+    /// assert_eq!(1000, frame.code);
+    /// assert_eq!("reason here", frame.reason);
+    /// ```
+    pub fn new(code: u16, reason: impl Into<Cow<'a, str>>) -> Self {
         Self {
             code,
             reason: reason.into(),
@@ -95,8 +95,6 @@ mod tests {
         Clone,
         Debug,
         Eq,
-        From<(u16, &'static str)>,
-        From<(u16, String)>,
         PartialEq,
     );
     assert_impl_all!(Message: Clone, Debug, Eq, PartialEq);

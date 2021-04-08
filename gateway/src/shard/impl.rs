@@ -578,7 +578,7 @@ impl Shard {
     /// let mut shard = Shard::new(token, Intents::GUILDS);
     /// shard.start().await?;
     ///
-    /// let close = CloseFrame::from((1000, ""));
+    /// let close = CloseFrame::new(1000, "");
     /// let message = Message::Close(Some(close));
     /// shard.send(message).await?;
     /// # Ok(()) }

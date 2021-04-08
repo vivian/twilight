@@ -421,7 +421,7 @@ impl Cluster {
     /// cluster.up().await;
     ///
     /// // some time later..
-    /// let close = CloseFrame::from((1012, ""));
+    /// let close = CloseFrame::new(1012, "");
     /// let message = Message::Close(Some(close));
     /// cluster.send(7, message).await?;
     /// # Ok(()) }
