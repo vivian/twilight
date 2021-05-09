@@ -116,7 +116,7 @@ mod tests {
                 Token::NewtypeStruct { name: "ChannelId" },
                 Token::Str("1"),
                 Token::Str("type"),
-                Token::U8(kind as u8),
+                Token::U8(kind.number()),
                 Token::Str("name"),
                 Token::Str("foo"),
                 Token::Str("parent_id"),

@@ -21,8 +21,8 @@ serde-value = { default-features = false, version = "0.7" }
 serde_repr = { default-features = false, version = "0.1" }
 tracing = { default-features = false, version = "0.1" }
 
-[dev-dependencies]
-criterion = "0.3"
+# [dev-dependencies]
+# criterion = "0.3"
 serde_json = { default-features = false, features = ["alloc"], version = "1" }
 serde_test = { default-features = false, version = "1" }
 

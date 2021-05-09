@@ -1,89 +1,93 @@
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::{
-    convert::TryFrom,
-    error::Error,
-    fmt::{Display, Formatter, Result as FmtResult},
+use crate::visitor::NumericEnumVisitor;
+use serde::{
+    de::{Deserialize, Deserializer},
+    ser::{Serialize, Serializer},
 };
 
 /// Format type of a [Sticker][`super::Sticker`].
-#[derive(
-    Clone, Copy, Debug, Deserialize_repr, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize_repr,
-)]
-#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum StickerFormatType {
     /// Sticker format is a PNG.
-    Png = 1,
+    Png,
     /// Sticker format is an APNG.
-    Apng = 2,
+    Apng,
     /// Sticker format is a LOTTIE.
-    Lottie = 3,
+    Lottie,
+    /// Type is unknown to Twilight.
+    Unknown {
+        /// Raw unknown variant number.
+        value: u8,
+    },
 }
 
-impl TryFrom<u8> for StickerFormatType {
-    type Error = StickerFormatTypeConversionError;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        Ok(match value {
-            1 => StickerFormatType::Png,
-            2 => StickerFormatType::Apng,
-            3 => StickerFormatType::Lottie,
-            _ => return Err(StickerFormatTypeConversionError { value }),
-        })
+impl StickerFormatType {
+    /// Retrieve the raw API variant number.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use twilight_model::channel::message::sticker::StickerFormatType;
+    ///
+    /// assert_eq!(2, StickerFormatType::Apng.number());
+    /// ```
+    pub fn number(self) -> u8 {
+        match self {
+            Self::Png => 1,
+            Self::Apng => 2,
+            Self::Lottie => 3,
+            Self::Unknown { value } => value,
+        }
     }
 }
 
-/// Converting into a [`StickerFormatType`] failed.
-///
-/// This occurs only when the input value doesn't map to a sticker type variant.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct StickerFormatTypeConversionError {
-    value: u8,
-}
-
-impl<'a> StickerFormatTypeConversionError {
-    /// Retrieve a copy of the input value that couldn't be parsed.
-    pub fn value(&self) -> u8 {
-        self.value
+impl From<u8> for StickerFormatType {
+    fn from(value: u8) -> Self {
+        match value {
+            1 => Self::Png,
+            2 => Self::Apng,
+            3 => Self::Lottie,
+            value => Self::Unknown { value },
+        }
     }
 }
 
-impl Display for StickerFormatTypeConversionError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_fmt(format_args!(
-            "Value ({}) doesn't match a sticker type",
-            self.value,
-        ))
+impl<'de> Deserialize<'de> for StickerFormatType {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_u8(NumericEnumVisitor::new("sticker format type"))
     }
 }
 
-impl Error for StickerFormatTypeConversionError {}
+impl Serialize for StickerFormatType {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.number())
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::StickerFormatType;
     use serde_test::Token;
-    use std::convert::TryFrom;
+
+    const MAP: &[(StickerFormatType, u8)] = &[
+        (StickerFormatType::Png, 1),
+        (StickerFormatType::Apng, 2),
+        (StickerFormatType::Lottie, 3),
+    ];
 
     #[test]
     fn test_variants() {
-        serde_test::assert_tokens(&StickerFormatType::Png, &[Token::U8(1)]);
-        serde_test::assert_tokens(&StickerFormatType::Apng, &[Token::U8(2)]);
-        serde_test::assert_tokens(&StickerFormatType::Lottie, &[Token::U8(3)]);
+        for (kind, num) in MAP {
+            serde_test::assert_tokens(kind, &[Token::U8(*num)]);
+            assert_eq!(*kind, StickerFormatType::from(*num));
+            assert_eq!(*num, kind.number());
+        }
     }
 
     #[test]
-    fn test_conversions() {
+    fn test_unknown_conversion() {
         assert_eq!(
-            StickerFormatType::try_from(1).unwrap(),
-            StickerFormatType::Png
-        );
-        assert_eq!(
-            StickerFormatType::try_from(2).unwrap(),
-            StickerFormatType::Apng
-        );
-        assert_eq!(
-            StickerFormatType::try_from(3).unwrap(),
-            StickerFormatType::Lottie
+            StickerFormatType::Unknown { value: 250 },
+            StickerFormatType::from(250)
         );
     }
 }

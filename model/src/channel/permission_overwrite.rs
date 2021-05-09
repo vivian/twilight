@@ -1,9 +1,13 @@
 use crate::{
     guild::Permissions,
     id::{RoleId, UserId},
+    visitor::NumericEnumVisitor,
 };
-use serde::{de::Deserializer, ser::SerializeStruct, Deserialize, Serialize, Serializer};
-use serde_repr::{Deserialize_repr, Serialize_repr};
+use serde::{
+    de::Deserializer,
+    ser::SerializeStruct,
+    Deserialize, Serialize, Serializer,
+};
 
 pub(crate) mod integer {
     use serde::de::{Deserializer, Error as DeError, Visitor};
@@ -59,14 +63,52 @@ struct PermissionOverwriteData {
 }
 
 /// Type of a permission overwrite target.
-#[derive(Clone, Debug, Deserialize_repr, Eq, Hash, PartialEq, Serialize_repr)]
-#[repr(u8)]
-#[serde(rename_all = "snake_case")]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum PermissionOverwriteTargetType {
-    /// Permission overwrite targets an individual member.
-    Member = 1,
     /// Permission overwrite targets an individual role.
-    Role = 0,
+    Role,
+    /// Permission overwrite targets an individual member.
+    Member,
+}
+
+impl PermissionOverwriteTargetType {
+    /// Retrieve the raw API variant number.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use twilight_model::channel::permission_overwrite::PermissionOverwriteTargetType;
+    ///
+    /// assert_eq!(1, PermissionOverwriteTargetType::Role.number());
+    /// ```
+    pub fn number(self) -> u8 {
+        match self {
+            Self::Role => 0,
+            Self::Member => 1,
+        }
+    }
+}
+
+impl From<u8> for PermissionOverwriteTargetType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => Self::Role,
+            1 => Self::Member,
+            _ => todo!("needs an other variant"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for PermissionOverwriteTargetType {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_u8(NumericEnumVisitor::new("permission overwrite target type"))
+    }
+}
+
+impl Serialize for PermissionOverwriteTargetType {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.number())
+    }
 }
 
 impl<'de> Deserialize<'de> for PermissionOverwrite {
@@ -109,11 +151,11 @@ impl Serialize for PermissionOverwrite {
         match &self.kind {
             PermissionOverwriteType::Member(id) => {
                 state.serialize_field("id", &id.0.to_string())?;
-                state.serialize_field("type", &(PermissionOverwriteTargetType::Member as u8))?;
+                state.serialize_field("type", &(PermissionOverwriteTargetType::Member.number()))?;
             }
             PermissionOverwriteType::Role(id) => {
                 state.serialize_field("id", &id.0.to_string())?;
-                state.serialize_field("type", &(PermissionOverwriteTargetType::Role as u8))?;
+                state.serialize_field("type", &(PermissionOverwriteTargetType::Role.number()))?;
             }
         }
 

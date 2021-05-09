@@ -9,7 +9,7 @@ mod kind;
 
 pub use self::{
     id::{StickerId, StickerPackId},
-    kind::{StickerFormatType, StickerFormatTypeConversionError},
+    kind::StickerFormatType,
 };
 
 use serde::{Deserialize, Serialize};

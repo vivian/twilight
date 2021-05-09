@@ -1,18 +1,24 @@
-use serde_repr::{Deserialize_repr, Serialize_repr};
+use crate::visitor::NumericEnumVisitor;
+use serde::{
+    de::{Deserialize, Deserializer},
+    ser::{Serialize, Serializer},
+};
 
-#[derive(
-    Clone, Copy, Debug, Deserialize_repr, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize_repr,
-)]
-#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ChannelType {
-    GuildText = 0,
-    Private = 1,
-    GuildVoice = 2,
-    Group = 3,
-    GuildCategory = 4,
-    GuildNews = 5,
-    GuildStore = 6,
-    GuildStageVoice = 13,
+    GuildText,
+    Private,
+    GuildVoice,
+    Group,
+    GuildCategory,
+    GuildNews,
+    GuildStore,
+    GuildStageVoice,
+    /// Type is unknown to Twilight.
+    Unknown {
+        /// Raw unknown variant number.
+        value: u8,
+    },
 }
 
 impl ChannelType {
@@ -26,7 +32,59 @@ impl ChannelType {
             Self::GuildText => "GuildText",
             Self::GuildVoice => "GuildVoice",
             Self::Private => "Private",
+            Self::Unknown { .. } => "Unknown",
         }
+    }
+
+    /// Retrieve the raw API variant number.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use twilight_model::channel::ChannelType;
+    ///
+    /// assert_eq!(5, ChannelType::GuildNews.number());
+    /// ```
+    pub fn number(self) -> u8 {
+        match self {
+            Self::GuildText => 0,
+            Self::Private => 1,
+            Self::GuildVoice => 2,
+            Self::Group => 3,
+            Self::GuildCategory => 4,
+            Self::GuildNews => 5,
+            Self::GuildStore => 6,
+            Self::GuildStageVoice => 13,
+            Self::Unknown { value } => value,
+        }
+    }
+}
+
+impl From<u8> for ChannelType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => Self::GuildText,
+            1 => Self::Private,
+            2 => Self::GuildVoice,
+            3 => Self::Group,
+            4 => Self::GuildCategory,
+            5 => Self::GuildNews,
+            6 => Self::GuildStore,
+            13 => Self::GuildStageVoice,
+            value => Self::Unknown { value },
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for ChannelType {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_u8(NumericEnumVisitor::new("channel type"))
+    }
+}
+
+impl Serialize for ChannelType {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.number())
     }
 }
 
@@ -35,16 +93,29 @@ mod tests {
     use super::ChannelType;
     use serde_test::Token;
 
+    const MAP: &[(ChannelType, u8)] = &[
+        (ChannelType::GuildText, 0),
+        (ChannelType::Private, 1),
+        (ChannelType::GuildVoice, 2),
+        (ChannelType::Group, 3),
+        (ChannelType::GuildCategory, 4),
+        (ChannelType::GuildNews, 5),
+        (ChannelType::GuildStore, 6),
+        (ChannelType::GuildStageVoice, 13),
+    ];
+
     #[test]
     fn test_variants() {
-        serde_test::assert_tokens(&ChannelType::GuildText, &[Token::U8(0)]);
-        serde_test::assert_tokens(&ChannelType::Private, &[Token::U8(1)]);
-        serde_test::assert_tokens(&ChannelType::GuildVoice, &[Token::U8(2)]);
-        serde_test::assert_tokens(&ChannelType::Group, &[Token::U8(3)]);
-        serde_test::assert_tokens(&ChannelType::GuildCategory, &[Token::U8(4)]);
-        serde_test::assert_tokens(&ChannelType::GuildNews, &[Token::U8(5)]);
-        serde_test::assert_tokens(&ChannelType::GuildStore, &[Token::U8(6)]);
-        serde_test::assert_tokens(&ChannelType::GuildStageVoice, &[Token::U8(13)]);
+        for (kind, num) in MAP {
+            serde_test::assert_tokens(kind, &[Token::U8(*num)]);
+            assert_eq!(*kind, ChannelType::from(*num));
+            assert_eq!(*num, kind.number());
+        }
+    }
+
+    #[test]
+    fn test_unknown_conversion() {
+        assert_eq!(ChannelType::Unknown { value: 250 }, ChannelType::from(250));
     }
 
     #[test]
