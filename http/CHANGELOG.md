@@ -86,6 +86,62 @@ Add custom method enum type for use rather than `hyper`'s ([#767] - [@vivian]).
 [#751]: https://github.com/twilight-rs/twilight/pull/751
 [#708]: https://github.com/twilight-rs/twilight/pull/708
 
+## [0.3.8] - 2021-04-27
+
+### Additions
+
+Support the "Get Guild Welcome Screen" and "Update Guild Welcome Screen"
+endpoints ([#792] - [@7596ff]).
+
+[#792]: https://github.com/twilight-rs/twilight/pull/792
+
+## [0.3.7] - 2021-04-22
+
+### Upgrade Path
+
+`CreateInvite::target_user` is deprecated, use `CreateInvite::target_user_id`.
+
+### Additions
+
+Add HTTP error code 60003, "Two factor is required for this operation"
+([#770] - [@vivian]).
+
+Add HTTP error code 10062, "Unknown interaction." ([#780] - [@vivian]).
+
+Support searching the members of a guild via HTTP ([#587] - [@Gelbpunkt]).
+
+Support guild templates via the following request handlers:
+
+- `CreateGuildFromTemplate`
+- `CreateTemplate`
+- `DeleteTemplate`
+- `GetTemplates`
+- `GetTemplate`
+- `SyncTemplate`
+- `UpdateTemplate`
+
+([#736] - [@7596ff]).
+
+### Fixes
+
+Add missing route mappings for Path parsing ([#743] - [@AEnterprise]).
+
+Deprecate `CreateInvite::target_user`, add `CreateInvite::target_user_id` to
+match the corrected field name when creating an invite ([#771] - [@vivian]).
+
+Correctly parse global ratelimit headers ([#766] - [@vivian]).
+
+Fix how long to sleep when encountering a global ratelimit ([#787] - [@vivian]).
+
+[#787]: https://github.com/twilight-rs/twilight/pull/787
+[#780]: https://github.com/twilight-rs/twilight/pull/780
+[#771]: https://github.com/twilight-rs/twilight/pull/771
+[#770]: https://github.com/twilight-rs/twilight/pull/770
+[#766]: https://github.com/twilight-rs/twilight/pull/766
+[#743]: https://github.com/twilight-rs/twilight/pull/743
+[#736]: https://github.com/twilight-rs/twilight/pull/736
+[#587]: https://github.com/twilight-rs/twilight/pull/587
+
 ## [0.3.6] - 2021-04-04
 
 ### Fixes
@@ -530,6 +586,7 @@ Initial release.
 [0.2.0-beta.1:app integrations]: https://github.com/discord/discord-api-docs/commit/a926694e2f8605848bda6b57d21c8817559e5cec
 
 [0.4.0]: https://github.com/twilight-rs/twilight/releases/tag/http-0.4.0
+[0.3.8]: https://github.com/twilight-rs/twilight/releases/tag/http-v0.3.8
 [0.3.6]: https://github.com/twilight-rs/twilight/releases/tag/http-v0.3.6
 [0.3.5]: https://github.com/twilight-rs/twilight/releases/tag/http-v0.3.5
 [0.3.4]: https://github.com/twilight-rs/twilight/releases/tag/http-v0.3.4
