@@ -2,6 +2,12 @@
 
 Changelog for `twilight-cache-inmemory`.
 
+## [0.4.0] - 2021-05-??
+
+### Upgrade Path
+
+The MSRV is now Rust 1.49.
+
 ## [0.3.5] - 2021-04-12
 
 ### Enhancements
@@ -195,6 +201,7 @@ Initial release.
 [#528]: https://github.com/twilight-rs/twilight/pull/528
 [#524]: https://github.com/twilight-rs/twilight/pull/524
 
+[0.4.0]: https://github.com/twilight-rs/twilight/releases/tag/cache-in-memory-0.4.0
 [0.3.5]: https://github.com/twilight-rs/twilight/releases/tag/cache-in-memory-v0.3.5
 [0.3.4]: https://github.com/twilight-rs/twilight/releases/tag/cache-in-memory-v0.3.4
 [0.3.2]: https://github.com/twilight-rs/twilight/releases/tag/cache-in-memory-v0.3.2

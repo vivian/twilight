@@ -2,6 +2,50 @@
 
 Changelog for `twilight-model`.
 
+## [0.4.0] - 2021-05-??
+
+### Upgrade Path
+
+The MSRV is now Rust 1.49.
+
+Don't reference `GuildStatus`. `Ready::guilds` is now a `Vec<UnavailableGuild>`.
+
+Don't reference `Guild::lazy`.
+
+Errors are no longer enums and don't expose their concrete underlying error
+source. You can access the underlying error via the implemented
+`std::error::Error::source` method or the `into_parts` or `into_source` methods
+on each error struct, which will return a boxed `std::error::Error`. To access
+the reason for the error use the `kind` or `into_parts` method on error structs;
+the returned error type is an enum with variants for each potential reason the
+error occurred.
+
+### Additions
+
+Support `MessageReference::fail_if_not_exists`, which will fail sending a
+message if the referenced message does not exist ([#708] - [@7596ff]).
+
+Implement `Ord` for roles based on position and ID ([#762] - [@james7132]).
+
+Add a reworked Allowed Mentions model and builder, moved from the
+`twilight-http` crate ([#760] - [@7596ff]).
+
+### Changes
+
+Remove the `guild::GuildStatus` enum because guilds are never online in `Ready`
+payloads ([#688] - [@vivian]).
+
+`MessageUpdate::mentions` is now a `Vec<Mention>` instead of a `Vec<User>`
+([#699] - [@chamburr]).
+
+Remove the `Guild::lazy` field ([#724] - [@7596ff]).
+
+[#762]: https://github.com/twilight-rs/twilight/pull/762
+[#724]: https://github.com/twilight-rs/twilight/pull/724
+[#708]: https://github.com/twilight-rs/twilight/pull/708
+[#699]: https://github.com/twilight-rs/twilight/pull/699
+[#688]: https://github.com/twilight-rs/twilight/pull/688
+
 ## [0.3.5] - 2021-04-12
 
 ### Additions
@@ -333,11 +377,13 @@ Initial release.
 
 [@7596ff]: https://github.com/7596ff
 [@AsianIntel]: https://github.com/AsianIntel
+[@chamburr]: https://github.com/chamburr
 [@DusterTheFirst]: https://github.com/DusterTheFirst
 [@Erk-]: https://github.com/Erk-
 [@Gelbpunkt]: https://github.com/Gelbpunkt
 [@chamburr]: https://github.com/chamburr
 [@coadler]: https://github.com/coadler
+[@james7132]: https://github.com/james7132
 [@jazevedo620]: https://github.com/jazevedo620
 [@kotx]: https://github.com/kotx
 [@nickelc]: https://github.com/nickelc
@@ -368,6 +414,7 @@ Initial release.
 
 [0.2.0-beta.1:app integrations]: https://github.com/discord/discord-api-docs/commit/a926694e2f8605848bda6b57d21c8817559e5cec
 
+[0.4.0]: https://github.com/twilight-rs/twilight/releases/tag/model-0.4.0
 [0.3.5]: https://github.com/twilight-rs/twilight/releases/tag/model-v0.3.5
 [0.3.4]: https://github.com/twilight-rs/twilight/releases/tag/model-v0.3.4
 [0.3.3]: https://github.com/twilight-rs/twilight/releases/tag/model-v0.3.3
