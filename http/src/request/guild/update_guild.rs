@@ -1,7 +1,7 @@
 use crate::{
     client::Client,
     error::Error as HttpError,
-    request::{self, validate, AuditLogReason, AuditLogReasonError, Pending, Request},
+    request::{self, validate, AuditLogReason, AuditLogReasonError, PendingResponse, Request},
     routing::Route,
 };
 use serde::Serialize;
@@ -128,7 +128,7 @@ struct UpdateGuildFields {
 /// [the discord docs]: https://discord.com/developers/docs/resources/guild#modify-guild
 pub struct UpdateGuild<'a> {
     fields: UpdateGuildFields,
-    fut: Option<Pending<'a, PartialGuild>>,
+    fut: Option<PendingResponse<'a, PartialGuild>>,
     guild_id: GuildId,
     http: &'a Client,
     reason: Option<String>,

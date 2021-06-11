@@ -1,7 +1,7 @@
 use crate::{
     client::Client,
     error::Error,
-    request::{Pending, Request},
+    request::{PendingResponse, Request},
     routing::Route,
 };
 use serde::Serialize;
@@ -22,7 +22,7 @@ struct UpdateGuildWidgetFields {
 /// Modify the guild widget.
 pub struct UpdateGuildWidget<'a> {
     fields: UpdateGuildWidgetFields,
-    fut: Option<Pending<'a, GuildWidget>>,
+    fut: Option<PendingResponse<'a, GuildWidget>>,
     guild_id: GuildId,
     http: &'a Client,
 }

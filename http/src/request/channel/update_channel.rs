@@ -1,7 +1,7 @@
 use crate::{
     client::Client,
     error::Error as HttpError,
-    request::{self, validate, AuditLogReason, AuditLogReasonError, Pending, Request},
+    request::{self, validate, AuditLogReason, AuditLogReasonError, PendingResponse, Request},
     routing::Route,
 };
 use serde::Serialize;
@@ -115,7 +115,7 @@ struct UpdateChannelFields {
 pub struct UpdateChannel<'a> {
     channel_id: ChannelId,
     fields: UpdateChannelFields,
-    fut: Option<Pending<'a, Channel>>,
+    fut: Option<PendingResponse<'a, Channel>>,
     http: &'a Client,
     reason: Option<String>,
 }

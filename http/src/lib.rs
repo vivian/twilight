@@ -98,6 +98,7 @@ pub mod client;
 pub mod error;
 pub mod ratelimiting;
 pub mod request;
+pub mod response;
 pub mod routing;
 
 mod json;
@@ -105,7 +106,7 @@ mod json;
 /// Discord API version used by this crate.
 pub const API_VERSION: u8 = 8;
 
-pub use crate::{client::Client, error::Error};
+pub use crate::{client::Client, error::Error, response::Response};
 
 #[allow(deprecated)]
 pub use crate::error::Result;

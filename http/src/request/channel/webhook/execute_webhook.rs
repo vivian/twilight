@@ -1,13 +1,14 @@
+use super::ExecuteWebhookAndWait;
 use crate::{
     client::Client,
     error::Error,
-    request::{Form, Pending, Request},
+    request::{Form, PendingResponse, Request},
+    response::marker::EmptyBody,
     routing::Route,
 };
-use futures_util::future::TryFutureExt;
 use serde::Serialize;
 use twilight_model::{
-    channel::{embed::Embed, message::AllowedMentions, Message},
+    channel::{embed::Embed, message::AllowedMentions},
     id::WebhookId,
 };
 
@@ -26,12 +27,10 @@ pub(crate) struct ExecuteWebhookFields {
     #[serde(skip_serializing_if = "Option::is_none")]
     username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    wait: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) allowed_mentions: Option<AllowedMentions>,
 }
 
-/// Executes a webhook, sending a message to its channel.
+/// Execute a webhook, sending a message to its channel.
 ///
 /// You can only specify one of [`content`], [`embeds`], or [`file`].
 ///
@@ -46,7 +45,7 @@ pub(crate) struct ExecuteWebhookFields {
 /// let client = Client::new("my token");
 /// let id = WebhookId(432);
 ///
-/// let webhook = client
+/// client
 ///     .execute_webhook(id, "webhook token")
 ///     .content("Pinkie...")
 ///     .await?;
@@ -59,7 +58,7 @@ pub(crate) struct ExecuteWebhookFields {
 pub struct ExecuteWebhook<'a> {
     pub(crate) fields: ExecuteWebhookFields,
     files: Vec<(String, Vec<u8>)>,
-    fut: Option<Pending<'a, Option<Message>>>,
+    fut: Option<PendingResponse<'a, EmptyBody>>,
     http: &'a Client,
     token: String,
     webhook_id: WebhookId,
@@ -148,9 +147,10 @@ impl<'a> ExecuteWebhook<'a> {
     /// let message = client.execute_webhook(WebhookId(1), "token here")
     ///     .content("some content")
     ///     .embeds(vec![EmbedBuilder::new().title("title").build()?])
-    ///     .wait(true)
+    ///     .wait()
     ///     .await?
-    ///     .unwrap();
+    ///     .model()
+    ///     .await?;
     ///
     /// assert_eq!(message.content, "some content");
     /// # Ok(()) }
@@ -168,9 +168,10 @@ impl<'a> ExecuteWebhook<'a> {
     /// let message = client.execute_webhook(WebhookId(1), "token here")
     ///     .content("some content")
     ///     .payload_json(r#"{ "content": "other content", "embeds": [ { "title": "title" } ] }"#)
-    ///     .wait(true)
+    ///     .wait()
     ///     .await?
-    ///     .unwrap();
+    ///     .model()
+    ///     .await?;
     ///
     /// assert_eq!(message.content, "other content");
     /// # Ok(()) }
@@ -198,20 +199,20 @@ impl<'a> ExecuteWebhook<'a> {
         self
     }
 
-    /// If true, wait for the message to send before sending a response. See [Discord Docs/Execute
-    /// Webhook]
+    /// Wait for the message to send before sending a response. See
+    /// [Discord Docs/Execute Webhook].
+    ///
+    /// Using this will result in receiving the created message.
     ///
     /// [Discord Docs/Execute Webhook]: https://discord.com/developers/docs/resources/webhook#execute-webhook-querystring-params
-    pub fn wait(mut self, wait: bool) -> Self {
-        self.fields.wait.replace(wait);
-
-        self
+    pub fn wait(self) -> ExecuteWebhookAndWait<'a> {
+        ExecuteWebhookAndWait::new(self.http, self.webhook_id, self.token, self.fields)
     }
 
     fn start(&mut self) -> Result<(), Error> {
         let mut request = Request::builder(Route::ExecuteWebhook {
             token: self.token.clone(),
-            wait: self.fields.wait,
+            wait: Some(false),
             webhook_id: self.webhook_id.0,
         });
 
@@ -238,19 +239,11 @@ impl<'a> ExecuteWebhook<'a> {
             request = request.json(&self.fields)?;
         }
 
-        match self.fields.wait {
-            Some(true) => {
-                self.fut
-                    .replace(Box::pin(self.http.request(request.build())));
-            }
-            _ => {
-                self.fut
-                    .replace(Box::pin(self.http.verify(request.build()).map_ok(|_| None)));
-            }
-        }
+        self.fut
+            .replace(Box::pin(self.http.request(request.build())));
 
         Ok(())
     }
 }
 
-poll_req!(ExecuteWebhook<'_>, Option<Message>);
+poll_req!(ExecuteWebhook<'_>, EmptyBody);

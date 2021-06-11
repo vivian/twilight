@@ -1,7 +1,7 @@
 use crate::{
     client::Client,
     error::Error as HttpError,
-    request::{multipart::Form, validate, Pending, Request},
+    request::{multipart::Form, validate, PendingResponse, Request},
     routing::Route,
 };
 use serde::Serialize;
@@ -124,7 +124,7 @@ pub struct CreateMessage<'a> {
     channel_id: ChannelId,
     pub(crate) fields: CreateMessageFields,
     files: Vec<(String, Vec<u8>)>,
-    fut: Option<Pending<'a, Message>>,
+    fut: Option<PendingResponse<'a, Message>>,
     http: &'a Client,
 }
 

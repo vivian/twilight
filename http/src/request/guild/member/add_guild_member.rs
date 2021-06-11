@@ -1,16 +1,13 @@
 use crate::{
     client::Client,
-    error::{Error as HttpError, ErrorType},
-    request::{validate, PendingOption, Request},
+    error::Error as HttpError,
+    request::{validate, PendingResponse, Request},
     routing::Route,
 };
 use serde::Serialize;
 use std::{
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
-    future::Future,
-    pin::Pin,
-    task::{Context, Poll},
 };
 use twilight_model::{
     guild::PartialMember,
@@ -84,7 +81,7 @@ struct AddGuildMemberFields {
 
 pub struct AddGuildMember<'a> {
     fields: AddGuildMemberFields,
-    fut: Option<PendingOption<'a>>,
+    fut: Option<PendingResponse<'a, PartialMember>>,
     guild_id: GuildId,
     http: &'a Client,
     user_id: UserId,
@@ -177,41 +174,10 @@ impl<'a> AddGuildMember<'a> {
         .json(&self.fields)?
         .build();
 
-        self.fut.replace(Box::pin(self.http.request_bytes(request)));
+        self.fut.replace(Box::pin(self.http.request(request)));
 
         Ok(())
     }
 }
 
-impl Future for AddGuildMember<'_> {
-    type Output = Result<Option<PartialMember>, HttpError>;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        loop {
-            if let Some(fut) = self.as_mut().fut.as_mut() {
-                let bytes = match fut.as_mut().poll(cx) {
-                    Poll::Ready(Ok(bytes)) => bytes,
-                    Poll::Ready(Err(why)) => return Poll::Ready(Err(why)),
-                    Poll::Pending => return Poll::Pending,
-                };
-
-                let mut bytes = bytes.as_ref().to_vec();
-
-                if bytes.is_empty() {
-                    return Poll::Ready(Ok(None));
-                }
-
-                return Poll::Ready(crate::json::from_slice(&mut bytes).map(Some).map_err(
-                    |source| HttpError {
-                        kind: ErrorType::Parsing { body: bytes },
-                        source: Some(Box::new(source)),
-                    },
-                ));
-            }
-
-            if let Err(why) = self.as_mut().start() {
-                return Poll::Ready(Err(why));
-            }
-        }
-    }
-}
+poll_req!(AddGuildMember<'_>, PartialMember);
